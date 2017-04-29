@@ -1,0 +1,25 @@
+{
+  "name": "korkoAPI",
+  "version": "1.0.0",
+  "description": "Backend for korko.cf",
+  "author": "Konrad Łyś",
+  "bin": {
+    "module-name": "./index.js"
+  },
+  "dependencies": {
+    "express": "4.12.3",
+    "http-status": "0.1.8",
+    "mongoose": "4.0.3",
+    "wagner-core": "0.1.0",
+    "body-parser": "1.17.1"
+  },
+  "devDependancies":{
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "mocha": "^2.4.5"
+  },
+  "scripts":{
+    "start": "nodejs index.js",
+    "test":"mocha tests.js --reporter nyan"
+  }
+}

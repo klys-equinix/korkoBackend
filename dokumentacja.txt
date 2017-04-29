@@ -1,0 +1,25 @@
+"główny adres":"korko.cf:3000/api/v1/coach"
+"opis":"API składa się z szeregu endpointów za głownym adresem, następująco:"
+"/heartbeat":"pokazuje czy api jest żywe"
+"/searchCategories":"ogólny endpint wyszukiwania,uruchomiony bez parametrów zwraca całą bazę,ma następujące parametry:
+-limit-ilość rekrdów do wyświetlenia,
+-longitiude i lattitude - punkt wokół którego szukasz
+-radius-promień wyszukiwania w kilometrach
+-email-email
+-surname-nazwisko
+-name-imie
+-oauth-oauth
+-lowEnd-dolna granica cenowa//aby uzywa lowEnd i highEnd należy podać level i odwrotnie
+-highEnd-górna granica cenowa
+-level-poziom nauczania
+-przykłądowe query :
+-subjects-przedmioty, dla wielu przedmiotów należy wiele razy napisać subjects
+"/new"-tworzenie nowego użytkownika, należy wysłać obiekt metodą POST, przykładowy obiekt w pliku exampleObject.json,
+dokładny opis struktury obiektu w pilku coach.js
+"/addRating"-dodawania oceny użytkownika ,parametry:
+-email-aby znaleźć użytkownika
+-value- 1 do 10
+-review- ocena słowna
+"/deleteOne"- usuwanie użytkownika po emailu , parametr email
+"/error"-endpoint odpalany w sytuacji gdy padnie mongo i reszta parametrów nie działą
+//oprócz tego jest jeszcze deleteAll
