@@ -66,7 +66,11 @@ var coach = {
         review: {
             type: String,
             maxlength: 250
+        },
+        oauth: {
+            type: String
         }
+
     }]
 }
 var coachSchema = new mongoose.Schema(coach);

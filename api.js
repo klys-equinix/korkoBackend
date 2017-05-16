@@ -8,13 +8,11 @@ module.exports = function (wagner) {
 
     var api = express.Router();
     api.use(bodyparser.json());
-    var environment = process.env.NODE_ENV;
-    let database;
 
     mongoose.connect('mongodb://localhost:27017/test', function (err) {
         api.get('/coach/error', function (req, res) {
-            res.json({
-                "Error encountered": err
+            res.status(503).json({
+                error: err
             });
         });
     });
@@ -38,8 +36,8 @@ module.exports = function (wagner) {
                     });
                 });
             } else {
-                res.json({
-                    "error": "no email specified"
+                res.status(400).json({
+                    error: "no email specified"
                 });
             }
         };
@@ -73,26 +71,46 @@ module.exports = function (wagner) {
     }));
     api.get('/coach/addRating', wagner.invoke(function (Coach) {
         return function (req, res) {
+            var responseMessage = "";
             Coach.findOneAndUpdate({
-                    "profile.email": req.query.email
+                    "profile.oauth": req.query.oauth
+                }, {
+                    $pull: {
+                        "rating": {
+                            "oauth": req.query.revOAuth
+                        }
+                    }
+                }, {
+                    upsert: false
+                },
+                (err, coaches) => {
+                    if (err) return res.status(500).json({
+                        error: err
+                    });
+                    responseMessage += "previous comment delted";
+                })
+            Coach.findOneAndUpdate({
+                    "profile.oauth": req.query.oauth
                 }, {
                     $push: {
                         "rating": {
                             "value": req.query.value,
-                            "review": req.query.review
+                            "review": req.query.review,
+                            "oauth": req.query.revOAuth
                         }
                     }
                 }, {
-                    upsert: true
+                    upsert: false
                 },
-                function (err, doc) {
-                    if (err) return res.status(500).send({
+                (err, coaches) => {
+                    if (err) return res.status(500).json({
                         error: err
                     });
                     return res.json({
-                        "succesfully saved": doc
+                        "rating": [responseMessage, "new comment inserted"]
                     });
                 })
+
         }
     }));
     api.get('/coach/searchCategories', wagner.invoke(function (Coach) {
@@ -123,19 +141,21 @@ module.exports = function (wagner) {
                         sortParameter["description.subjects.uniPrice"] = order;
                         break;
                     case "average":
-                        sortParameter["averageRating"]=order;
+                        sortParameter["averageRating"] = order;
                         break;
                 }
             }
             try {
                 parseSearchCall(searchObject, req);
             } catch (err) {
-                res.json({
-                    "error parsing query": err
+                res.status(400).json({
+                    error: err
                 });
                 return;
             }
-            Coach.find(searchObject).limit(limit).sort({ 'description.subjects.uniPrice': 1 }).
+            Coach.find(searchObject).limit(limit).sort({
+                'description.subjects.uniPrice': 1
+            }).
             exec(function (error, coaches) {
                 if (error) {
                     return res.
@@ -163,7 +183,7 @@ module.exports = function (wagner) {
             newbie.loc = req.body.loc;
             newbie.rating = req.body.rating;
             Coach.findOne({
-                "profile.email": req.body.profile.email
+                "profile.oauth": req.body.profile.oauth
             }, (err, coach) => {
                 if (err) {
                     return res.
@@ -173,24 +193,42 @@ module.exports = function (wagner) {
                     });
                 }
                 if (coach != null) {
-                    return res.json({
-                        error: "user already exists"
-                    });
+                    Coach.update({
+                        "profile.oauth": req.body.profile.oauth
+                    }, {
+                        $set: {
+                            "profile": req.body.profile,
+                            "description": req.body.description,
+                            "loc": req.body.loc,
+                            "rating": req.body.rating
+                        }
+                    }, {
+                        upsert: false
+                    }, (err, coach) => {
+                        if (err) return res.status(500).json({
+                            error: err
+                        });
+
+                        return res.json({
+                            "succesfully saved": "user modified"
+                        });
+                    })
                 } else {
                     newbie.save((err, user) => {
                         if (err) {
                             return res.
                             status(status.INTERNAL_SERVER_ERROR).
                             json({
-                                err: err.toString()
+                                error: err.toString()
                             });
                         }
                         return res.json({
-                            user: user
+                            "succesfully saved": "new user created"
                         });
                     })
                 }
             })
+
 
         };
     }));
@@ -227,7 +265,7 @@ function parseSearchCall(searchObject, req) {
                 throw "lowEnd and highEnd unspecified";
             }
             if (req.query.level.constructor === Array) {
-                for (let i =0;i<req.query.level.length;i++) {
+                for (let i = 0; i < req.query.level.length; i++) {
                     searchObject["description.subjects." + req.query.level[i]] = {
                         $gt: req.query.lowEnd,
                         $lt: req.query.highEnd
@@ -257,5 +295,6 @@ function parseSearchCall(searchObject, req) {
         }
 
     }
+    
 
 }

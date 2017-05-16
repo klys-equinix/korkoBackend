@@ -11,13 +11,14 @@
 -oauth-oauth
 -lowEnd-dolna granica cenowa//aby uzywa lowEnd i highEnd należy podać level i odwrotnie
 -highEnd-górna granica cenowa
--level-poziom nauczania
--przykłądowe query :
+-level-poziom nauczania// można już używać wielu
 -subjects-przedmioty, dla wielu przedmiotów należy wiele razy napisać subjects
+-order - porządek sortowania (1 lub -1)
+-sort - po czym będziemy sortować, może być primaryPrice,secondaryPrice,highschoolPrice,uniPrice,averages
 "/new"-tworzenie nowego użytkownika, należy wysłać obiekt metodą POST, przykładowy obiekt w pliku exampleObject.json,
-dokładny opis struktury obiektu w pilku coach.js
+dokładny opis struktury obiektu w pilku coach.js, ponowne wysłanie użytkownika skutkuje nadpisaniem
 "/addRating"-dodawania oceny użytkownika ,parametry:
--email-aby znaleźć użytkownika
+-oauth-aby znaleźć użytkownika
 -value- 1 do 10
 -review- ocena słowna
 "/deleteOne"- usuwanie użytkownika po emailu , parametr email
